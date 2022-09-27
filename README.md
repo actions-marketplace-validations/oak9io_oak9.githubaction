@@ -34,7 +34,7 @@ jobs:
       uses: actions/checkout@v2
     - name: oak9 Github Action
       id: oak9
-      uses: oak9io/oak9.githubaction@v1.0.2
+      uses: oak9io/oak9.githubaction@v1.0.3
       env:
         OAK9_API_TOKEN: ${{ secrets.OAK9_API_TOKEN }}
         GITHUB_REPOSITORY: $GITHUB_REPOSITORY
@@ -44,6 +44,7 @@ jobs:
         projectId: '[your-oak9-project-id]'
         maximumSeverity: 'High'
         logDesignGaps: true
+        pollingTimeoutSeconds: 30
 ```
 
 ## Parameters
@@ -52,6 +53,7 @@ jobs:
 - `projectId` - **_(Required)_** Your oak9 project ID.
 - `maximumSeverity` - **_(Required)_** The threshold at which a detected design gap will cause your workflow to fail. One of `none`, `low`, `moderate`, `high`, or `critical`.
 - `logDesignGaps` - An indicator of whether you'd like any detected design gaps output to the GitHub Actions build log. Defaults to `false`.
+- `pollingTimeoutSeconds` - Time in seconds to wait for an oak9 validation to complete before failing. Defaults to `30`
 
 ## Secrets
 

@@ -51114,7 +51114,6 @@ let designGapCounterFactory = new DesignGapCounterFactory(DesignGapCounter);
 let masterGapCounter = designGapCounterFactory.create();
 let resourceGapCounter = new ResourceDesignGapCounter(designGapCounterFactory);
 
-const TIMES_TO_RETRY = 30;
 const RETRYABLE_STATUS = 503;
 const RETRYABLE_STATUS_TIMEOUT = 504;
 const REQUEST_STATUS = 'Completed';
@@ -51129,6 +51128,7 @@ module.exports = (fileName) =>
     );
     // fetch the configuration value for design gap logging
     const logDesignGapsConfig = core.getInput('logDesignGaps').toLowerCase();
+    const timesToRetry = core.getInput('pollingTimeoutSeconds') || 30;
 
     // GitHub Actions always returns values as a string, we want to convert to a boolean safely.
     const shouldLogDesignGaps = (logDesignGapsConfig === 'true');
@@ -51158,7 +51158,7 @@ module.exports = (fileName) =>
           try {
             const { status } = err.response;
             if (!requestIdValue) {
-              if (status === RETRYABLE_STATUS && retryTimes < TIMES_TO_RETRY) {
+              if (status === RETRYABLE_STATUS && retryTimes < timesToRetry) {
                 core.info(`queueIacValidation called, ${retryTimes}`);
                 setTimeout(runQueueIacValidation, 1000);
               } else {
@@ -51204,7 +51204,7 @@ module.exports = (fileName) =>
         const { status } = checkRequestStatusResponse.data;
         core.info(`\u001b[1;34mRequest status: ${status}`);
         if (status !== REQUEST_STATUS) {
-          if (retryTimes < TIMES_TO_RETRY) {
+          if (retryTimes < timesToRetry) {
             core.info(`Retrying checkRequestStatus, ${retryTimes}`);
             setTimeout(runCheckStatus, 1000);
           } else {
@@ -51248,7 +51248,7 @@ module.exports = (fileName) =>
           if (
             (status === RETRYABLE_STATUS ||
               status === RETRYABLE_STATUS_TIMEOUT) &&
-            retryTimes < TIMES_TO_RETRY
+            retryTimes < timesToRetry
           ) {
             core.info(
               `checkRequestStatus called, ${retryTimes}, failed status is: ${status}`
@@ -51515,9 +51515,7 @@ module.exports = (sourceCodeDirectory, zipFileName) =>
       resolve();
     } catch (error) {
       reject(JSON.stringify(error));
-    } finally {
-      fs.rmdirSync(zipFileName, { recursive: true });
-    }
+    } 
   });
 
 /**
@@ -51568,7 +51566,7 @@ module.exports.moveFilesToNewDirectory = moveFilesToNewDirectory;
 function checkIfDirectoryIsEmpty(newDirectoryName) {
   const files = fs.readdirSync(newDirectoryName);
   if (files.includes('.github')) {
-    fs.rmdirSync(`${newDirectoryName}/.github`, { recursive: true });
+    fs.rmSync(`${newDirectoryName}/.github`, { recursive: true });
     files.splice(files.indexOf('.github'), 1);
   }
   if (files.length === 0) throw 'Directory has no files';
@@ -54362,6 +54360,7 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 const core = __nccwpck_require__(2186);
+const fs = __nccwpck_require__(5747);
 const validateEnvVars = __nccwpck_require__(4284);
 const cleanAndPrepareFile = __nccwpck_require__(3654);
 const publishFileService = __nccwpck_require__(4203);
@@ -54409,7 +54408,6 @@ async function run() {
       );
     }
     // #endregion
-
 
     core.info('\u001b[1;32mDONE');
   } catch (error) {

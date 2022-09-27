@@ -15,8 +15,11 @@ inputs:
   logDesignGaps:
     description: 'A boolean flag that notes if design gaps should be displayed in GitHub Workflow console'
     default: false
+  pollingTimeoutSeconds:
+    description: 'Time in seconds to wait for an oak9 validation to complete before failing'
+    default: 30
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'index.js'
 branding:
   icon: 'shield'
